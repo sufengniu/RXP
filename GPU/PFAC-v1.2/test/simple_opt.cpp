@@ -46,21 +46,55 @@
 #include <assert.h>
 #include <unistd.h>
 #include <vector>
-#include <limits.h>
 
 #include <PFAC.h>
+
+
+// #define	SEL_MOD
+
+int processCommandOption( int argc, char** argv, char **input) 
+{
+	int index;	
+	int opt;
+
+	while((opt = getopt(argc, argv, "I:")) != -1)
+		switch(opt)
+		{
+			case 'I':
+				*input = optarg;
+				break;
+			case '?':
+				if (optopt == 'I')
+					fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+				else if (isprint(optopt))
+					fprintf(stderr, "Unknown option '-%c'.\n", optopt);
+				else
+					fprintf(stderr, "Unknown character '\\x%x'.\n", optopt);
+				return 1;
+			default:
+				abort();
+
+		}
+
+	for(index = optind; index < argc; index++)
+		printf("Non-option argument %s\n", argv[index]);	
+
+	return 0;
+}
 
 
 int main(int argc, char **argv)
 {
 	char dumpTableFile[] = "table.txt" ;	  
-	
+	char inputFile[] = "../test/data/test_input" ;
 	char patternFile[] = "../test/pattern/space_pattern" ;
 	PFAC_handle_t handle ;
 	PFAC_status_t PFAC_status ;
 	int input_size ;    
 	char *h_inputString = NULL ;
 	int  *h_matched_result = NULL ;
+	
+	char *h_inputString_buf = NULL;
 
 	// step 1: create PFAC handle 
 	PFAC_status = PFAC_create( &handle ) ;
@@ -83,15 +117,41 @@ int main(int argc, char **argv)
 		exit(1) ;	
 	}
 
-	// step 3: prepare input string
-	h_inputString = (char *)malloc(sizeof(char)*LINE_MAX);
-	printf("max string size should less than %d\n", LINE_MAX);
-	fgets(h_inputString, LINE_MAX, stdin);
+	if (argc <= 1){
+		printf("no input arguments, using default value\n"); 	
 
-	input_size = strlen(h_inputString);
-	h_matched_result = (int *) malloc (sizeof(int)*input_size);	
+		//step 3: prepare input stream
+		FILE* fpin = fopen( inputFile, "rb");
+		assert ( NULL != fpin ) ;
 
-	memset (h_matched_result, 0, sizeof(int)*input_size);	
+		// obtain file size
+		fseek (fpin , 0 , SEEK_END);
+		input_size = ftell (fpin);
+		rewind (fpin);  
+
+		printf("input_size is %d\n", input_size);
+		// allocate memory to contain the whole file
+		h_inputString = (char *) malloc (sizeof(char)*input_size);
+		assert( NULL != h_inputString );
+
+		h_matched_result = (int *) malloc (sizeof(int)*input_size);
+		assert( NULL != h_matched_result );
+		memset( h_matched_result, 0, sizeof(int)*input_size ) ;
+
+		// copy the file into the buffer
+		input_size = fread (h_inputString, 1, input_size, fpin);
+		fclose(fpin);    
+	}
+	else{
+		// step 3: prepare input string
+		processCommandOption(argc, argv, &h_inputString);		
+
+		input_size = strlen(h_inputString);	
+
+		h_matched_result = (int *) malloc (sizeof(int)*input_size);	
+				
+		memset (h_matched_result, 0, sizeof(int)*input_size);	
+	}
 
 	// step 4: run PFAC on GPU           
 	PFAC_status = PFAC_matchFromHost( handle, h_inputString, input_size, h_matched_result ) ;
@@ -114,8 +174,7 @@ int main(int argc, char **argv)
 	}
 	
 	for (i = 0; i < positionQ.size(); i++){
-	
-		keylen = positionQ[i+1]-positionQ[i];	
+		keylen = positionQ[i+1]-positionQ[i];
 		
 		printf("%.*s\t%d\n", keylen, &h_inputString[positionQ[i]], 1);	
 		
@@ -126,8 +185,9 @@ int main(int argc, char **argv)
 
 	PFAC_status = PFAC_destroy( handle ) ;
 	assert( PFAC_STATUS_SUCCESS == PFAC_status );
-
-	free(h_inputString);
+	
+	if (argc <= 1)
+		free(h_inputString);	
 	free(h_matched_result); 
 
 	return 0;
