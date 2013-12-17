@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 	printf("max string size should less than %d\n", LINE_MAX);
 	fgets(h_inputString, LINE_MAX, stdin);
 
-	input_size = strlen(h_inputString);
+	input_size = strlen(h_inputString)-1;
 	h_matched_result = (int *) malloc (sizeof(int)*input_size);	
 
 	memset (h_matched_result, 0, sizeof(int)*input_size);	
@@ -112,11 +112,22 @@ int main(int argc, char **argv)
 			positionQ.push_back(i+1);
 		}
 	}
-	
+			
 	for (i = 0; i < positionQ.size(); i++){
-	
+
 		keylen = positionQ[i+1]-positionQ[i];	
-		
+			
+		// if keylen < 0, this means this is the last element 
+		// in h_inputString array,
+		if (keylen == 1){
+			continue;
+		} else if (keylen < 0){	
+			keylen = input_size - positionQ[i];
+
+			if (keylen == 0)
+				break;
+		}
+
 		printf("%.*s\t%d\n", keylen, &h_inputString[positionQ[i]], 1);	
 		
 	}

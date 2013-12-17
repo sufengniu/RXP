@@ -126,7 +126,7 @@ int main(int argc, char **argv)
 
 		// obtain file size
 		fseek (fpin , 0 , SEEK_END);
-		input_size = ftell (fpin);
+		input_size = ftell (fpin)-1;
 		rewind (fpin);  
 
 		printf("input_size is %d\n", input_size);
@@ -188,6 +188,7 @@ int main(int argc, char **argv)
 	
 	if (argc <= 1)
 		free(h_inputString);	
+
 	free(h_matched_result); 
 
 	return 0;
