@@ -50,6 +50,21 @@
 
 #include <PFAC.h>
 
+#define	Kilo	1000
+#define Mega	1000*Kilo
+#define Giga	1000*Mega
+
+#define PROC_SIZE	10*Mega
+
+void charcpy(char *target, char *source){
+	while(*source)
+	{
+		*target = *source;
+		source++;
+		target++;
+	}
+	*target = '\0';
+}
 
 int main(int argc, char **argv)
 {
@@ -86,25 +101,28 @@ int main(int argc, char **argv)
 	// step 3: prepare input string
 	h_inputString = (char *)malloc(sizeof(char)*LINE_MAX);
 	printf("max string size should less than %d\n", LINE_MAX);
-	fgets(h_inputString, LINE_MAX, stdin);
 
-	input_size = strlen(h_inputString)-1;
+	char *inputString;
+	int offset = 0;
+	inputString = (char *)malloc(sizeof(char)*PROC_SIZE);	
+	while(fgets(h_inputString, LINE_MAX, stdin) != NULL) {	
+		h_inputString[strlen(h_inputString)-1] = ' ';	// replace each \n as blank
+		charcpy(inputString+offset, h_inputString);
+		offset += strlen(h_inputString);
+		printf("offset is %d, testing\n", offset);
+	}
+
+	input_size = strlen(inputString);
 	h_matched_result = (int *) malloc (sizeof(int)*input_size);	
 
 	memset (h_matched_result, 0, sizeof(int)*input_size);	
 
 	// step 4: run PFAC on GPU           
-	PFAC_status = PFAC_matchFromHost( handle, h_inputString, input_size, h_matched_result ) ;
+	PFAC_status = PFAC_matchFromHost( handle, inputString, input_size, h_matched_result ) ;
 	if ( PFAC_STATUS_SUCCESS != PFAC_status ){
 		printf("Error: fails to PFAC_matchFromHost, %s\n", PFAC_getErrorString(PFAC_status) );
 		exit(1) ;	
 	}     
-
-	for (int i = 0; i < input_size; i++) {
-		if (h_matched_result[i] != 0) {
-			printf("At position %4d, match pattern %d\n", i, h_matched_result[i]);
-		}
-	}
 
 	// step 5: output matched result
 	// parse in serial, GPU version should be considered
@@ -124,7 +142,7 @@ int main(int argc, char **argv)
 		keylen = positionQ[i+1]-positionQ[i];	
 			
 		// if keylen < 0, this means this is the last element 
-		// in h_inputString array,
+		// in inputString array,
 		if (keylen == 1){
 			continue;
 		} else if (keylen < 0){	
@@ -135,7 +153,7 @@ int main(int argc, char **argv)
 		}
 		
 		if (i != positionQ.size()-1)	
-			printf("%.*s\t%d\n", keylen, &h_inputString[positionQ[i]], 1);	
+			printf("%.*s\t%d\n", keylen, &inputString[positionQ[i]], 1);	
 		
 	}
 
@@ -145,6 +163,7 @@ int main(int argc, char **argv)
 	PFAC_status = PFAC_destroy( handle ) ;
 	assert( PFAC_STATUS_SUCCESS == PFAC_status );
 
+	free(inputString);
 	free(h_inputString);
 	free(h_matched_result); 
 
