@@ -100,16 +100,22 @@ int main(int argc, char **argv)
 		exit(1) ;	
 	}     
 
+	for (int i = 0; i < input_size; i++) {
+		if (h_matched_result[i] != 0) {
+			printf("At position %4d, match pattern %d\n", i, h_matched_result[i]);
+		}
+	}
+
 	// step 5: output matched result
 	// parse in serial, GPU version should be considered
 	std::vector<int> positionQ;
-	int keylen, i;
-	for (int i = 0; i < input_size; i++) {
-		if (i == 0){
-			positionQ.push_back(i);
-		}
-		else if (h_matched_result[i] != 0) {
+	int keylen, i;	
+	for (int i = 0; i < input_size; i++) {	
+		if (h_matched_result[i] != 0)  {
 			positionQ.push_back(i+1);
+		}
+		else if (i == 0) {
+			positionQ.push_back(i);
 		}
 	}
 			
@@ -127,8 +133,9 @@ int main(int argc, char **argv)
 			if (keylen == 0)
 				break;
 		}
-
-		printf("%.*s\t%d\n", keylen, &h_inputString[positionQ[i]], 1);	
+		
+		if (i != positionQ.size()-1)	
+			printf("%.*s\t%d\n", keylen, &h_inputString[positionQ[i]], 1);	
 		
 	}
 

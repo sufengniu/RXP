@@ -165,19 +165,31 @@ int main(int argc, char **argv)
 	std::vector<int> positionQ;
 	int keylen, i;
 	for (int i = 0; i < input_size; i++) {
-		if (i == 0){
-			positionQ.push_back(i);
-		}
-		else if (h_matched_result[i] != 0) {
+		if (h_matched_result[i] != 0)  {
 			positionQ.push_back(i+1);
+		}
+		else if (i == 0) {
+			positionQ.push_back(i);
 		}
 	}
 	
 	for (i = 0; i < positionQ.size(); i++){
 		keylen = positionQ[i+1]-positionQ[i];
-		
-		printf("%.*s\t%d\n", keylen, &h_inputString[positionQ[i]], 1);	
-		
+
+		// if keylen < 0, this means this is the last element
+		// in h_inputString array,
+		if (keylen == 1){
+			continue;
+		} else if (keylen < 0){
+			keylen = input_size - positionQ[i];
+
+			if (keylen == 0)
+				break;
+		}
+
+		if (i != positionQ.size()-1)
+			printf("%.*s\t%d\n", keylen, &h_inputString[positionQ[i]], 1);
+
 	}
 
 	// parse in parallel
