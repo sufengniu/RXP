@@ -50,7 +50,7 @@
 
 #include <PFAC.h>
 
-#define	Kilo	1000
+#define Kilo	1000
 #define Mega	1000*Kilo
 #define Giga	1000*Mega
 
@@ -109,7 +109,6 @@ int main(int argc, char **argv)
 		h_inputString[strlen(h_inputString)-1] = ' ';	// replace each \n as blank
 		charcpy(inputString+offset, h_inputString);
 		offset += strlen(h_inputString);
-		printf("offset is %d, testing\n", offset);
 	}
 
 	input_size = strlen(inputString);
