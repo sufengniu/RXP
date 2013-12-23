@@ -49,6 +49,7 @@
 #include <limits.h>
 #include <time.h>
 
+#include <cuda_runtime.h>
 #include <PFAC.h>
 
 #define BILLION 1000000000L
@@ -82,7 +83,6 @@ int main(int argc, char **argv)
 
 	struct timespec start, stop;
 	double load_accum, comp_accum, printf_accum;
-
 
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 
@@ -166,9 +166,10 @@ int main(int argc, char **argv)
 			if (keylen == 0)
 				break;
 		}
-		
+		/*
 		if (i != positionQ.size()-1)	
 			printf("%.*s\t%d\n", keylen, &inputString[positionQ[i]], 1);	
+		*/
 		
 	}
 
@@ -176,10 +177,13 @@ int main(int argc, char **argv)
 
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
 	printf_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
+
 	printf("data load done in %lf second\n", load_accum);
 	printf("computation done in %lf second\n", comp_accum);	
 	printf("printf done in %lf second\n", printf_accum);	
-
+	float throughput = ((float)input_size*8.0)/(comp_accum*1000000000);
+	printf("throughput is %lf Gbps\n", throughput);
+	
 	PFAC_status = PFAC_destroy( handle ) ;
 	assert( PFAC_STATUS_SUCCESS == PFAC_status );
 
