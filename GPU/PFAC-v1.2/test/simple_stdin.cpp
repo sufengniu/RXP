@@ -73,7 +73,7 @@ void charcpy(char *target, char *source){
 int main(int argc, char **argv)
 {
 	char dumpTableFile[] = "table.txt" ;	  
-	
+	char parseFile[] = "output.res";
 	char patternFile[] = "../test/pattern/space_pattern" ;
 	PFAC_handle_t handle ;
 	PFAC_status_t PFAC_status ;
@@ -151,7 +151,9 @@ int main(int argc, char **argv)
 			positionQ.push_back(i);
 		}
 	}
-			
+	
+	FILE *pFile = fopen(parseFile, "w");
+	assert(pFile != NULL);
 	for (i = 0; i < positionQ.size(); i++){
 
 		keylen = positionQ[i+1]-positionQ[i];	
@@ -166,12 +168,12 @@ int main(int argc, char **argv)
 			if (keylen == 0)
 				break;
 		}
-		/*
+		
 		if (i != positionQ.size()-1)	
-			printf("%.*s\t%d\n", keylen, &inputString[positionQ[i]], 1);	
-		*/
+			fprintf(pFile, "%.*s\t%d\n", keylen, &inputString[positionQ[i]], 1);	
 		
 	}
+	fclose(pFile);
 
 	// parse in parallel
 
