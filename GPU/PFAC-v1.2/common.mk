@@ -22,8 +22,8 @@
 
 PFAC_LIB_ROOT := $(PWD)
 
-CFLAGS        = -O3 -D_REENTRANT -Wall
-CXXFLAGS      = -O3 -D_REENTRANT -Wall
+CFLAGS        = -O2 -D_REENTRANT -Wall
+CXXFLAGS      = -O2 -D_REENTRANT -Wall
 
 #
 # CUDA toolkit may not be installed in default directory /usr/local/cuda 
@@ -60,7 +60,7 @@ words := $(shell nvcc -V | grep tools)
 nvcc_v_comma := $(filter-out Cuda compilation tools% release V%, $(words))
 comma := ,
 nvcc_version := $(subst $(comma),,$(nvcc_v_comma))
-sm_21_support := $(if $(filter $(nvcc_version), 3.2 4.0 4.1 4.2 5.0 5.5),1,)
+sm_21_support := $(if $(filter $(nvcc_version), 3.2 4.0 4.1 4.2 5.5),1,)
 sm_30_support := $(if $(filter $(nvcc_version), 4.2 5.0 5.5),1,)
 sm_35_support := $(if $(filter $(nvcc_version), 5.0 5.5),1,)
 

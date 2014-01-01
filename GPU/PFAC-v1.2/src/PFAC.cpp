@@ -156,7 +156,9 @@ PFAC_status_t  PFAC_create( PFAC_handle_t *handle )
     PFAC_PRINTF("major = %d, minor = %d, name=%s\n", deviceProp.major, deviceProp.minor, deviceProp.name );
 
     int device_no = 10*deviceProp.major + deviceProp.minor ;
-    if ( 30 == device_no ){
+    if ( 35 == device_no ){
+        strcpy (modulepath, "libpfac_sm35.so"); 
+    }else if ( 30 == device_no ){
         strcpy (modulepath, "libpfac_sm30.so");    
     }else if ( 21 == device_no ){
         strcpy (modulepath, "libpfac_sm21.so");    

@@ -52,6 +52,7 @@ cu_cpp_sm13_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm13_%.cpp,$(CU_CPP))
 cu_cpp_sm12_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm12_%.cpp,$(CU_CPP))
 cu_cpp_sm11_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm11_%.cpp,$(CU_CPP))
 
+cu_cpp_obj_sm35_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm35_%.cpp.o,$(CU_CPP))
 cu_cpp_obj_sm30_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm30_%.cpp.o,$(CU_CPP))
 cu_cpp_obj_sm21_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm21_%.cpp.o,$(CU_CPP))
 cu_cpp_obj_sm20_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm20_%.cpp.o,$(CU_CPP))
@@ -59,11 +60,13 @@ cu_cpp_obj_sm13_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm13_%.cpp.o,$(CU_CPP))
 cu_cpp_obj_sm12_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm12_%.cpp.o,$(CU_CPP))
 cu_cpp_obj_sm11_loc = $(patsubst %.cpp,$(OBJ_DIR)/sm11_%.cpp.o,$(CU_CPP))
 
-all: mk_libso_no21 mk_libso_21 mk_libso_30  mk_lib_fpic 
+all: mk_libso_no21 mk_libso_21 mk_libso_30 mk_libso_35 mk_lib_fpic 
 
+sm35_command := $(if $(sm_35_support),$(CXX) -shared -o $(LIB_DIR)/libpfac_sm35.so $(LIBS) $(cu_cpp_obj_sm35_loc),)
 sm30_command := $(if $(sm_30_support),$(CXX) -shared -o $(LIB_DIR)/libpfac_sm30.so $(LIBS) $(cu_cpp_obj_sm30_loc),)
 sm21_command := $(if $(sm_21_support),$(CXX) -shared -o $(LIB_DIR)/libpfac_sm21.so $(LIBS) $(cu_cpp_obj_sm21_loc),)
 
+cu_cpp_sm35_loc := $(if $(sm_35_support),$(patsubst %.cpp,$(OBJ_DIR)/sm35_%.cpp,$(CU_CPP)),)
 cu_cpp_sm30_loc := $(if $(sm_30_support),$(patsubst %.cpp,$(OBJ_DIR)/sm30_%.cpp,$(CU_CPP)),)
 cu_cpp_sm21_loc := $(if $(sm_21_support),$(patsubst %.cpp,$(OBJ_DIR)/sm21_%.cpp,$(CU_CPP)),)
 
@@ -73,6 +76,9 @@ mk_libso_no21: $(cu_cpp_sm20_loc) $(cu_cpp_sm13_loc) $(cu_cpp_sm12_loc) $(cu_cpp
 	$(CXX) -shared -o $(LIB_DIR)/libpfac_sm13.so $(LIBS) $(cu_cpp_obj_sm13_loc)
 	$(CXX) -shared -o $(LIB_DIR)/libpfac_sm12.so $(LIBS) $(cu_cpp_obj_sm12_loc)
 	$(CXX) -shared -o $(LIB_DIR)/libpfac_sm11.so $(LIBS) $(cu_cpp_obj_sm11_loc)
+
+mk_libso_35: $(cu_cpp_sm35_loc)
+	$(sm35_command)
 
 mk_libso_30: $(cu_cpp_sm30_loc)
 	$(sm30_command)  
@@ -100,6 +106,9 @@ $(OBJ_DIR)/PFAC_CPU_OMP_reorder.o: PFAC_CPU_OMP_reorder.cpp  $(inc_files)
 $(OBJ_DIR)/%.o: %.cpp  $(inc_files)
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
 
+$(OBJ_DIR)/sm35_%.cu.cpp: %.cu
+	$(NVCC) -arch=sm_35 -cuda $(INCPATH) -o $@ $<
+	$(CXX) -fPIC -O2 -c -o $@.o $@
 
 $(OBJ_DIR)/sm30_%.cu.cpp: %.cu
 	$(NVCC) -arch=sm_30 -cuda $(INCPATH) -o $@ $<
