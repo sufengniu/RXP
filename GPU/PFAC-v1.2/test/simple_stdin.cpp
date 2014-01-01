@@ -151,7 +151,29 @@ int main(int argc, char **argv)
 			positionQ.push_back(i);
 		}
 	}
-	
+
+	for (i = 0; i < positionQ.size(); i++){
+
+		keylen = positionQ[i+1]-positionQ[i];
+
+		// if keylen < 0, this means this is the last element
+		// in inputString array,
+		if (keylen == 1){
+			continue;
+		} else if (keylen < 0){
+			keylen = input_size - positionQ[i];
+
+			if (keylen == 0)
+				break;
+		}
+
+		if (i != positionQ.size()-1)
+			printf("%.*s\t%d\n", keylen, &inputString[positionQ[i]], 1);
+
+	}
+
+
+/*	
 	FILE *pFile = fopen(parseFile, "w");
 	assert(pFile != NULL);
 	for (i = 0; i < positionQ.size(); i++){
@@ -185,7 +207,8 @@ int main(int argc, char **argv)
 	printf("printf done in %lf second\n", printf_accum);	
 	float throughput = ((float)input_size*8.0)/(comp_accum*1000000000);
 	printf("throughput is %lf Gbps\n", throughput);
-	
+*/
+
 	PFAC_status = PFAC_destroy( handle ) ;
 	assert( PFAC_STATUS_SUCCESS == PFAC_status );
 
