@@ -58,6 +58,8 @@
 #define Mega	1000*Kilo
 #define Giga	1000*Mega
 
+//#define	_MEASURE_
+
 #define PROC_SIZE 700*Mega
 
 void charcpy(char *target, char *source){
@@ -84,7 +86,9 @@ int main(int argc, char **argv)
 	struct timespec start, stop;
 	double load_accum, comp_accum, printf_accum;
 
-//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+#ifdef _MEASURE_
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+#endif
 
 	// step 1: create PFAC handle 
 	PFAC_status = PFAC_create( &handle ) ;
@@ -127,21 +131,25 @@ int main(int argc, char **argv)
 
 	memset (h_matched_result, 0, sizeof(int)*input_size);	
 
-//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
-//	load_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
+#ifdef _MEASURE_
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+	load_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
 
-//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);	
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);	
+#endif
 	// step 4: run PFAC on GPU           
 	PFAC_status = PFAC_matchFromHost( handle, inputString, input_size, h_matched_result ) ;
 	if ( PFAC_STATUS_SUCCESS != PFAC_status ){
 		printf("Error: fails to PFAC_matchFromHost, %s\n", PFAC_getErrorString(PFAC_status) );
 		exit(1) ;	
 	}     
-//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
-//	comp_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
 
-//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+#ifdef _MEASURE_
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+	comp_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
 
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+#endif
 	// step 5: output matched result
 	// parse in serial, GPU version should be considered
 	std::vector<int> positionQ;
@@ -155,7 +163,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-
+#ifndef _MEASURE_
 	for (i = 0; i < positionQ.size(); i++){
 
 		keylen = positionQ[i+1]-positionQ[i];
@@ -175,8 +183,7 @@ int main(int argc, char **argv)
 			printf("%.*s\t%d\n", keylen, &inputString[positionQ[i]], 1);
 
 	}
-
-/*	
+#else
 	FILE *pFile = fopen(parseFile, "w");
 	assert(pFile != NULL);
 	for (i = 0; i < positionQ.size(); i++){
@@ -199,19 +206,18 @@ int main(int argc, char **argv)
 		
 	}
 	fclose(pFile);
-*/
+
 	// parse in parallel
 
-//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
-//	printf_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+	printf_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
 
-/*
 	printf("data load done in %lf second\n", load_accum);
 	printf("computation done in %lf second\n", comp_accum);	
 	printf("printf done in %lf second\n", printf_accum);	
 	float throughput = ((float)input_size*8.0)/(comp_accum*1000000000);
 	printf("throughput is %lf Gbps\n", throughput);
-*/
+#endif
 
 	PFAC_status = PFAC_destroy( handle ) ;
 	assert( PFAC_STATUS_SUCCESS == PFAC_status );
