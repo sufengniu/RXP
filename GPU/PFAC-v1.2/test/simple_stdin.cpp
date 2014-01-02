@@ -58,7 +58,7 @@
 #define Mega	1000*Kilo
 #define Giga	1000*Mega
 
-#define PROC_SIZE	2*Giga
+#define PROC_SIZE 700*Mega
 
 void charcpy(char *target, char *source){
 	while(*source)
@@ -77,14 +77,14 @@ int main(int argc, char **argv)
 	char patternFile[] = "../test/pattern/space_pattern" ;
 	PFAC_handle_t handle ;
 	PFAC_status_t PFAC_status ;
-	int input_size ;    
+	size_t input_size ;    
 	char *h_inputString = NULL ;
-	int  *h_matched_result = NULL ;
+	int *h_matched_result = NULL ;
 
 	struct timespec start, stop;
 	double load_accum, comp_accum, printf_accum;
 
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 
 	// step 1: create PFAC handle 
 	PFAC_status = PFAC_create( &handle ) ;
@@ -113,8 +113,10 @@ int main(int argc, char **argv)
 
 	char *inputString;
 	int offset = 0;
+	size_t len = 0;
 	inputString = (char *)malloc(sizeof(char)*PROC_SIZE);	
-	while(fgets(h_inputString, LINE_MAX, stdin) != NULL) {	
+//	while(fgets(h_inputString, LINE_MAX, stdin) != NULL) {	
+	while(getline(&h_inputString, &len, stdin) > 0) {
 		h_inputString[strlen(h_inputString)-1] = ' ';	// replace each \n as blank
 		charcpy(inputString+offset, h_inputString);
 		offset += strlen(h_inputString);
@@ -125,20 +127,21 @@ int main(int argc, char **argv)
 
 	memset (h_matched_result, 0, sizeof(int)*input_size);	
 
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
-	load_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
+//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+//	load_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
 
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);	
+//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);	
 	// step 4: run PFAC on GPU           
 	PFAC_status = PFAC_matchFromHost( handle, inputString, input_size, h_matched_result ) ;
 	if ( PFAC_STATUS_SUCCESS != PFAC_status ){
 		printf("Error: fails to PFAC_matchFromHost, %s\n", PFAC_getErrorString(PFAC_status) );
 		exit(1) ;	
 	}     
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
-	comp_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
+//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+//	comp_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
 
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+
 	// step 5: output matched result
 	// parse in serial, GPU version should be considered
 	std::vector<int> positionQ;
@@ -151,6 +154,7 @@ int main(int argc, char **argv)
 			positionQ.push_back(i);
 		}
 	}
+
 
 	for (i = 0; i < positionQ.size(); i++){
 
@@ -171,7 +175,6 @@ int main(int argc, char **argv)
 			printf("%.*s\t%d\n", keylen, &inputString[positionQ[i]], 1);
 
 	}
-
 
 /*	
 	FILE *pFile = fopen(parseFile, "w");
@@ -196,12 +199,13 @@ int main(int argc, char **argv)
 		
 	}
 	fclose(pFile);
-
+*/
 	// parse in parallel
 
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
-	printf_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
+//	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &stop);
+//	printf_accum = (stop.tv_sec - start.tv_sec)+(double)(stop.tv_nsec-start.tv_nsec)/(double)BILLION;
 
+/*
 	printf("data load done in %lf second\n", load_accum);
 	printf("computation done in %lf second\n", comp_accum);	
 	printf("printf done in %lf second\n", printf_accum);	
