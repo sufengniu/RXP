@@ -58,7 +58,7 @@
 #define Mega	1000*Kilo
 #define Giga	1000*Mega
 
-// #define	_MEASURE_
+//#define	_MEASURE_
 
 #define PROC_SIZE 700*Mega
 
@@ -102,18 +102,8 @@ int main(int argc, char **argv)
 		exit(1) ;
 	}
 
-	// dump transition table 
-/*	FILE *table_fp = fopen( dumpTableFile, "w") ;
-	assert( NULL != table_fp ) ;
-	PFAC_status = PFAC_dumpTransitionTable( handle, table_fp );
-	fclose( table_fp ) ;
-	if ( PFAC_STATUS_SUCCESS != PFAC_status ){
-		printf("Error: fails to dump transition table, %s\n", PFAC_getErrorString(PFAC_status) );
-		exit(1) ;	
-	}
-*/
 	// step 3: prepare input string
-	h_inputString = (char *)malloc(sizeof(char)*LINE_MAX);
+	h_inputString = (char *)malloc(sizeof(char)*2*LINE_MAX);
 	
 	char *inputString;
 	int offset = 0;
@@ -165,7 +155,7 @@ int main(int argc, char **argv)
 
 #ifndef _MEASURE_
 
-	char str[LINE_MAX];
+	char str[2*LINE_MAX];
 
 	for (i = 0; i < positionQ.size(); i++){
 
@@ -192,28 +182,6 @@ int main(int argc, char **argv)
 		}
 	}
 #else
-	FILE *pFile = fopen(parseFile, "w");
-	assert(pFile != NULL);
-	for (i = 0; i < positionQ.size(); i++){
-
-		keylen = positionQ[i+1]-positionQ[i];	
-			
-		// if keylen < 0, this means this is the last element 
-		// in inputString array,
-		if (keylen == 1){
-			continue;
-		} else if (keylen < 0){	
-			keylen = input_size - positionQ[i];
-
-			if (keylen == 0)
-				break;
-		}
-		
-		if (i != positionQ.size()-1)		
-			fprintf(pFile, "%.*s\t%d\n", keylen-1, &inputString[positionQ[i]], 1);	
-		
-	}
-	fclose(pFile);
 
 	// parse in parallel
 
@@ -225,6 +193,7 @@ int main(int argc, char **argv)
 	printf("printf done in %lf second\n", printf_accum);	
 	float throughput = ((float)input_size*8.0)/(comp_accum*1000000000);
 	printf("throughput is %lf Gbps\n", throughput);
+
 #endif
 
 	PFAC_status = PFAC_destroy( handle ) ;
