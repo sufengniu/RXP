@@ -11,7 +11,7 @@ OBJ_DIR = ../obj
 EXE_DIR = ../bin
 LIB_DIR = ../lib
 
-TARGET = simple_stdin simple_opt simple_example simple_example_reduce  profiling  omp_PFAC  SimpleMultiGPU_pthread  
+TARGET = simple_stdin_v1 simple_stdin_v2 simple_opt simple_example profiling  omp_PFAC  SimpleMultiGPU_pthread  
 
 .PHONY: all $(TARGET)
 
@@ -20,7 +20,7 @@ exe_files = $(patsubst %,%.exe,$(TARGET))
 all: $(exe_files)
  
 %.exe: $(OBJ_DIR)/%.o
-	$(LINK) -o $(EXE_DIR)/$@ $< -L$(LIB_DIR) -lpfac $(LIBS)
+	$(LINK) -o $(EXE_DIR)/$@ $< -L$(LIB_DIR) -lpfac -lrt $(LIBS)
 
 ####### Build rules
 
