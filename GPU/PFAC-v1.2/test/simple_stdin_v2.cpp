@@ -73,8 +73,7 @@ void charcpy(char *target, char *source){
 }
 
 int main(int argc, char **argv)
-{
-	char dumpTableFile[] = "table.txt" ;	  
+{	
 	char parseFile[] = "output.res";
 	char patternFile[] = "../test/pattern/space_pattern" ;
 	PFAC_handle_t handle ;
@@ -103,14 +102,13 @@ int main(int argc, char **argv)
 	}
 
 	// step 3: prepare input string
-	h_inputString = (char *)malloc(sizeof(char)*2*LINE_MAX);
-	
 	char *inputString;
 	int offset = 0;
 	size_t len = 0;
 	inputString = (char *)malloc(sizeof(char)*PROC_SIZE);	
 //	while(fgets(h_inputString, LINE_MAX, stdin) != NULL) {	
 	while(getline(&h_inputString, &len, stdin) > 0) {
+
 		h_inputString[strlen(h_inputString)-1] = ' ';	// replace each \n as blank
 		charcpy(inputString+offset, h_inputString);
 		offset += strlen(h_inputString);
@@ -178,6 +176,9 @@ int main(int argc, char **argv)
 			strcat(str, "\t1\n");
 	
 			fwrite(str, 1, keylen+2, stdout);
+
+			//fwrite(str, 1, keylen-1, stdout);
+			//fwrite("\t1\n", 1, 3, stdout);
 
 		}
 	}
