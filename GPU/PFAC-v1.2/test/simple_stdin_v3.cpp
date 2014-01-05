@@ -58,7 +58,7 @@
 #define Mega	1000*Kilo
 #define Giga	1000*Mega
 
-#define	_MEASURE_
+//#define	_MEASURE_
 
 #define PROC_SIZE 700*Mega
 
@@ -151,7 +151,19 @@ int main(int argc, char **argv)
 	char *res_tmp = res;
 	for (i = 0; i < input_size; i++) {
 	
-		if (h_matched_result[i] != 0) {
+		if (h_matched_result[i] == 0) {
+			*res = inputString[i];
+			res++;
+		} else {
+			if ((i > 0) && ( h_matched_result[i-1] == 0)) {
+				strcpy(res, "\t1\n");
+				res += 3;
+			} else {
+				continue;
+			}
+		}	
+
+	/*	if (h_matched_result[i] != 0) {
 			
 			if ((i > 0) && ( h_matched_result[i-1] == 0)) {
 				strcpy(res, "\t1\n");	
@@ -164,13 +176,13 @@ int main(int argc, char **argv)
 			
 			*res = inputString[i];
 			res++;	
-		}
+		}*/
 	}
 
 	res = res_tmp;
 
-//printf("%s\n", res);
-	fwrite(res, 1, strlen(res), stdout);
+	printf("%s\n", res);
+	//fwrite(res, 1, strlen(res), stdout);
 
 #ifdef _MEASURE_
 
