@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 	}
 
 	// step 3: prepare input string
-	h_inputString = (char *)malloc(sizeof(char)*LINE_MAX);
+	h_inputString = (char *)malloc(sizeof(char)*2*LINE_MAX);
 
 	char *inputString;
 	int offset = 0;

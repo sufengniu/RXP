@@ -74,7 +74,6 @@ void charcpy(char *target, char *source){
 
 int main(int argc, char **argv)
 {	
-	char parseFile[] = "output.res";
 	char patternFile[] = "../test/pattern/space_pattern" ;
 	PFAC_handle_t handle ;
 	PFAC_status_t PFAC_status ;
@@ -139,47 +138,39 @@ int main(int argc, char **argv)
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
 #endif
 	// step 5: output matched result
-	// parse in serial, GPU version should be considered
-	std::vector<int> positionQ;
-	int keylen, i;	
-	for (int i = 0; i < input_size; i++) {	
-		if (h_matched_result[i] != 0)  {
-			positionQ.push_back(i+1);
-		}
-		else if (i == 0) {
-			positionQ.push_back(i);
-		}
+	int i, count=0;
+	for (int i = 0; i < input_size; i++) {
+		if (h_matched_result[i] != 0) {
+			count++;
+		}	
 	}
-
-	char str[2*LINE_MAX];
-
-	for (i = 0; i < positionQ.size(); i++){
-
-		keylen = positionQ[i+1]-positionQ[i];
-
-		// if keylen < 0, this means this is the last element
-		// in inputString array,
-		if (keylen == 1){
-			continue;
-		} else if (keylen < 0){
-			keylen = input_size - positionQ[i];
-
-			if (keylen == 0)
-				break;
-		}		
-
-		if (i != positionQ.size()-1){	
-			memset(str, '\0', keylen+3);
-			memcpy(str, &inputString[positionQ[i]], keylen-1);
-			strcat(str, "\t1\n");
 	
-			fwrite(str, 1, keylen+2, stdout);
+	char *res = NULL;
+	res = (char *)malloc(input_size+3*count*sizeof(char));	
 
-			//fwrite(str, 1, keylen-1, stdout);
-			//fwrite("\t1\n", 1, 3, stdout);
-
+	char *res_tmp = res;
+	for (i = 0; i < input_size; i++) {
+	
+		if (h_matched_result[i] != 0) {
+			
+			if ((i > 0) && ( h_matched_result[i-1] == 0)) {
+				strcpy(res, "\t1\n");	
+				res += 3;
+			} else {
+				continue;
+			}
+		}
+		else {	 
+			
+			*res = inputString[i];
+			res++;	
 		}
 	}
+
+	res = res_tmp;
+
+//printf("%s\n", res);
+	fwrite(res, 1, strlen(res), stdout);
 
 #ifdef _MEASURE_
 
@@ -198,7 +189,8 @@ int main(int argc, char **argv)
 
 	PFAC_status = PFAC_destroy( handle ) ;
 	assert( PFAC_STATUS_SUCCESS == PFAC_status );
-
+	
+	free(res);
 	free(inputString);
 	free(h_inputString);
 	free(h_matched_result); 

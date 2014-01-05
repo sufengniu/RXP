@@ -11,7 +11,7 @@ OBJ_DIR = ../obj
 EXE_DIR = ../bin
 LIB_DIR = ../lib
 
-TARGET = simple_stdin_v1 simple_stdin_v2 simple_opt simple_example profiling  omp_PFAC  SimpleMultiGPU_pthread  
+TARGET = simple_stdin_v1 simple_stdin_v2 simple_stdin_v3 simple_opt simple_example profiling  omp_PFAC  SimpleMultiGPU_pthread  
 
 .PHONY: all $(TARGET)
 
